@@ -1,6 +1,6 @@
 import npyscreen
 
-from logform import LogForm
+from .logform import LogForm
 
 
 class Application(npyscreen.NPSAppManaged):

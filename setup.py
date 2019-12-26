@@ -9,5 +9,6 @@ setup(
     author_email="cbanek@gmail.com",
     packages=["kops"],
     install_requires=["kubernetes", "npyscreen"],
+    scripts=["bin/kops"],
     zip_safe=False,
 )
