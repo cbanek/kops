@@ -1,49 +1,28 @@
 from kubernetes import client, config
 import npyscreen
 
-
-class PodInputList(npyscreen.TitleMultiLine):
-    def __init__(self, *args, **keywords):
-        super().__init__(*args, **keywords)
-        self.onChange = keywords["onChanged"]
-
-    def when_value_edited(self):
-        self.onChange()
+from .podselectorform import PodSelectorForm
 
 
 class LogForm(npyscreen.FormBaseNew):
-    def afterEditing(self):
-        self.parentApp.setNextForm(None)
-
     def create(self):
-        self.add_handlers({"q": self.onQuit})
+        self.add_handlers({"b": self.onBack})
+        self.add_handlers({"s": self.onSelect})
 
         self.v1 = client.CoreV1Api()
-        self.pods = self.v1.list_pod_for_all_namespaces(watch=False).items
-
-        pod_names = [i.metadata.name for i in self.pods]
-
-        self.pod_list = self.add(
-            PodInputList,
-            scroll_exit=True,
-            height=5,
-            name="Pods",
-            values=pod_names,
-            onChanged=self.onChange,
-        )
         self.text = self.add(
-            npyscreen.TitleMultiLine,
-            scroll_exit=True,
-            name="Logs",
-            values=str(self.pods[0].to_str).split("\n"),
+            npyscreen.TitleMultiLine, scroll_exit=True, name="Logs", values=[]
         )
+        self.selector = self.parentApp.addForm("pod-selector", PodSelectorForm)
+        self.keypress_timeout = 10
 
-    def onChange(self):
-        index = self.pod_list.value
-        if index is None:
+    def while_waiting(self):
+        self.pods = self.selector.selected_pods
+
+        if not self.pods:
             return
 
-        pod = self.pods[index]
+        pod = self.pods[0]
         log = self.v1.read_namespaced_pod_log(
             name=pod.metadata.name, namespace=pod.metadata.namespace, tail_lines=60
         )
@@ -51,5 +30,9 @@ class LogForm(npyscreen.FormBaseNew):
         self.text.set_values(log.split("\n"))
         self.text.update()
 
-    def onQuit(self, *args, **keywords):
+    def onSelect(self, *args, **keywords):
+        self.parentApp.switchForm("pod-selector")
+
+    def onBack(self, *args, **keywords):
+        self.parentApp.setNextForm(None)
         self.parentApp.switchFormPrevious()
