@@ -13,7 +13,9 @@ class LogForm(npyscreen.FormBaseNew):
         self.text = self.add(
             npyscreen.TitleMultiLine, scroll_exit=True, name="Logs", values=[]
         )
-        self.selector = self.parentApp.addForm("pod-selector", PodSelectorForm)
+        self.selector = self.parentApp.addForm(
+            "pod-selector", PodSelectorForm, name="Select containers"
+        )
         self.keypress_timeout = 10
 
     def while_waiting(self):
