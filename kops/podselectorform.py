@@ -40,6 +40,7 @@ class PodSelectorForm(npyscreen.FormBaseNew):
 
         self.tree.values = r
         self.pod_update_id = id
+        self.tree.display()
 
     def onBack(self, *args, **keywords):
         self.selected_pods = []

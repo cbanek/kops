@@ -23,7 +23,12 @@ class KubernetesModel:
                 if action == "ADDED":
                     self._pods.append(event["object"])
                 if action == "DELETED":
-                    self._pods.remove(event["object"])
+                    def is_deleted_pod(x):
+                        return (x.metadata.name == event["object"].metadata.name and \
+                        x.metadata.namespace == event["object"].metadata.namespace)
+
+                    deleted_pods = list(filter(is_deleted_pod, self._pods))
+                    self._pods.remove(deleted_pods[0])
 
                 self._pod_update_id += 1
 
