@@ -1,24 +1,33 @@
+import threading
+
 import kubernetes
 
 
 class KubernetesModel:
     def __init__(self):
         self.api = kubernetes.client.CoreV1Api()
-        self.watch = kubernetes.watch.Watch()
-        self.pods = []
+        self._pod_watch = kubernetes.watch.Watch()
+        self._pods = []
+        self._pod_update_id = 0
 
-    def poll(self):
-        for event in self.watch.stream(
-            self.api.list_pod_for_all_namespaces, timeout_seconds=1
-        ):
+    def start(self):
+        self._pod_thread_lock = threading.Lock()
+        self._pod_thread = threading.Thread(target=self._watch_pods, daemon=True)
+        self._pod_thread.start()
+
+    def _watch_pods(self):
+        for event in self._pod_watch.stream(self.api.list_pod_for_all_namespaces):
             action = event["type"]
-            kind = event["object"].kind
-            name = event["object"].metadata.name
-            namespace = event["object"].metadata.namespace
 
-            if action == "ADDED":
-                if kind == "Pod":
-                    self.pods.append({"name": name, "namespace": namespace})
-            if action == "DELETED":
-                if kind == "Pod":
-                    self.pods.remove({"name": name, "namespace": namespace})
+            with self._pod_thread_lock:
+                if action == "ADDED":
+                    self._pods.append(event["object"])
+                if action == "DELETED":
+                    self._pods.remove(event["object"])
+
+                self._pod_update_id += 1
+
+    @property
+    def pods(self):
+        with self._pod_thread_lock:
+            return (self._pod_update_id, list(self._pods))
