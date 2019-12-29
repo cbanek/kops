@@ -14,6 +14,9 @@ class ContainerSelectorForm(npyscreen.FormBaseNew):
         self.pod_update_id = -1
         self.tree = self.add(npyscreen.MLTreeMultiSelect)
 
+    def sort(self, item):
+        return item.key
+
     def while_waiting(self):
         (id, pods) = self.parentApp.model.pods
 
@@ -23,6 +26,9 @@ class ContainerSelectorForm(npyscreen.FormBaseNew):
         # Build the tree, and collate namespaces.
         namespaces = {}
         r = npyscreen.TreeData(selectable=False, ignore_root=True)
+        r.sort = True
+        r.sort_function_wrapper = False
+        r.sort_function = self.sort
 
         for p in pods:
             namespace = namespaces.get(p.metadata.namespace, None)
