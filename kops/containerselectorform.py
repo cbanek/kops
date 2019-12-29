@@ -5,7 +5,7 @@ from kubernetes import client, config
 import npyscreen
 
 
-class PodSelectorForm(npyscreen.FormBaseNew):
+class ContainerSelectorForm(npyscreen.FormBaseNew):
     def create(self):
         self.keypress_timeout = 10
         self.add_handlers({"b": self.onBack})

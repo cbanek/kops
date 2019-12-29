@@ -1,7 +1,7 @@
 from kubernetes import client, config
 import npyscreen
 
-from .podselectorform import PodSelectorForm
+from .containerselectorform import ContainerSelectorForm
 
 
 class LogForm(npyscreen.FormBaseNew):
@@ -14,7 +14,7 @@ class LogForm(npyscreen.FormBaseNew):
             npyscreen.TitleMultiLine, scroll_exit=True, name="Logs", values=[]
         )
         self.selector = self.parentApp.addForm(
-            "container-selector", PodSelectorForm, name="Select containers"
+            "container-selector", ContainerSelectorForm, name="Select containers"
         )
         self.keypress_timeout = 10
 
