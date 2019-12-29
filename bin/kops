@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+import logging
 from kubernetes import config
 from kops.app import Application
 
+logging.basicConfig(level=logging.DEBUG, filename='/tmp/kops.log')
 config.load_kube_config()
+logging.info('kops starting up...')
 App = Application().run()

@@ -1,5 +1,4 @@
 import npyscreen
-
 from .kubernetesmodel import KubernetesModel
 from .logform import LogForm
 

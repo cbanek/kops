@@ -14,26 +14,29 @@ class LogForm(npyscreen.FormBaseNew):
             npyscreen.TitleMultiLine, scroll_exit=True, name="Logs", values=[]
         )
         self.selector = self.parentApp.addForm(
-            "pod-selector", PodSelectorForm, name="Select containers"
+            "container-selector", PodSelectorForm, name="Select containers"
         )
         self.keypress_timeout = 10
 
     def while_waiting(self):
-        self.pods = self.selector.selected_pods
+        self.containers = self.selector.selected_containers
 
-        if not self.pods:
+        if not self.containers:
             return
 
-        pod = self.pods[0]
+        pod = self.containers[0]
         log = self.v1.read_namespaced_pod_log(
-            name=pod.metadata.name, namespace=pod.metadata.namespace, tail_lines=60
+            name=pod.metadata.name,
+            namespace=pod.metadata.namespace,
+            container=pod.spec.containers[0].name,
+            tail_lines=60
         )
 
         self.text.set_values(log.split("\n"))
         self.text.update()
 
     def onSelect(self, *args, **keywords):
-        self.parentApp.switchForm("pod-selector")
+        self.parentApp.switchForm("container-selector")
 
     def onBack(self, *args, **keywords):
         self.parentApp.setNextForm(None)
